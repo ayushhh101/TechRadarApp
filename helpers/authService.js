@@ -3,6 +3,23 @@ import { saveToken, getToken, removeToken } from './asyncStorage';
 
 const API_URL = 'http://10.0.2.2:8000'; // Replace with your backend URL
 
+// Create an Axios instance
+const api = axios.create({
+  baseURL: API_URL,
+});
+
+// Add an interceptor to include the token in all requests
+api.interceptors.request.use(
+  async (config) => {
+    const token = await AsyncStorage.getItem('user_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export const register = async (username, email, password, name, city) => {
   
   const requestBody = { username, email, password, name, city };

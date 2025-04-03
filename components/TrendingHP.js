@@ -1,8 +1,10 @@
 import React from 'react';
-import { Text, View, Image } from 'react-native';
+import { Text, View, Image, TouchableOpacity } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
 import style from '../components/styleTrendingHP';
 
-const TrendingHP = ({ clg, name, time, cost, seatRem, seatTotal, timeRem }) => {
+const TrendingHP = ({ id, clg, name, time, cost, seatRem, seatTotal, timeRem }) => {
+    const navigation = useNavigation();
     return (
         <View>
             <View style={[style.body]}>
@@ -30,7 +32,18 @@ const TrendingHP = ({ clg, name, time, cost, seatRem, seatTotal, timeRem }) => {
                         <Text style={style.seats}>{seatTotal}</Text>
                     </View>
 
-                    <Text style={[style.reg]}>Register</Text>
+                    <TouchableOpacity
+                        style={{
+                            marginTop: 10,
+                            backgroundColor: "#FF5733",
+                            padding: 10,
+                            borderRadius: 5,
+                            alignItems: "center"
+                        }}
+                        onPress={() => navigation.navigate("RegisterHackathon", { hackathonId: id })}
+                    >
+                        <Text style={{ color: "white", fontSize: 16 }}>Register</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </View>

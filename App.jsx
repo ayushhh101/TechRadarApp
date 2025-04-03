@@ -10,6 +10,9 @@ import SearchScreen from './screens/SearchScreen';
 import WishlistScreen from './screens/WishlistScreen';
 import JoinedScreen from './screens/JoinedScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import AdminScreen from './screens/AdminScreen';
+import OrganiserScreen from './screens/OrganiserScreen';
+import RegisterHackathonScreen from './screens/RegisterHackathonScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +28,9 @@ const App = () => {
         <Stack.Screen name="Wishlist" component={WishlistScreen} />
         <Stack.Screen name="Joined" component={JoinedScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="AdminDashboard" component={AdminScreen} />
+        <Stack.Screen name="OrganiserDashboard" component={OrganiserScreen} />
+        <Stack.Screen name="RegisterHackathon" component={RegisterHackathonScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     </PaperProvider>

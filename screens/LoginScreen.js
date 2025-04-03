@@ -8,10 +8,19 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      await login(username, password);
+      const { user, token } = await login(username, password);
       Alert.alert('Login Successful');
-      navigation.replace('Home'); // Navigate to home screen
+
+      if (user.role === 'user') {
+        navigation.replace('Home');
+      } else if (user.role === 'admin') {
+        navigation.replace('AdminDashboard');
+      } else if (user.role === 'organiser') {
+        navigation.replace('OrganiserDashboard');
+      }
+
     } catch (error) {
+      console.log(error)
       Alert.alert('Login Failed', error.response?.data?.message || 'Something went wrong');
     }
   };
