@@ -13,6 +13,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import AdminScreen from './screens/AdminScreen';
 import OrganiserScreen from './screens/OrganiserScreen';
 import RegisterHackathonScreen from './screens/RegisterHackathonScreen';
+import HackathonDetailsScreen from './screens/HackathonDetailsScreen';
 
 const Stack = createStackNavigator();
 
@@ -31,6 +32,7 @@ const App = () => {
         <Stack.Screen name="AdminDashboard" component={AdminScreen} />
         <Stack.Screen name="OrganiserDashboard" component={OrganiserScreen} />
         <Stack.Screen name="RegisterHackathon" component={RegisterHackathonScreen} />
+        <Stack.Screen name="HackathonDetails" component={HackathonDetailsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     </PaperProvider>

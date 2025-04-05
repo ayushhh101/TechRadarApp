@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, FlatList, ScrollView ,TouchableOpacity  } from 'react-native';
-import { getToken, removeToken ,getUser} from '../helpers/asyncStorage';
+import { View, Text, TextInput, Button, Alert, StyleSheet, FlatList, ScrollView, TouchableOpacity } from 'react-native';
+import { getToken, removeToken, getUser } from '../helpers/asyncStorage';
 import axios from 'axios';
 
 const OrganiserScreen = ({ navigation }) => {
@@ -52,8 +52,8 @@ const OrganiserScreen = ({ navigation }) => {
 
   const handleSubmit = async () => {
     try {
-      const token = await getToken(); 
-      const response = await axios.post('http://10.0.2.2:8000/addHackathon', 
+      const token = await getToken();
+      const response = await axios.post('http://10.0.2.2:8000/addHackathon',
         hackathon,
         {
           headers: {
@@ -77,73 +77,78 @@ const OrganiserScreen = ({ navigation }) => {
 
   return (
     <>
-     <ScrollView style={styles.container}>
-      <Text style={styles.heading}>Welcome, {user?.username || 'Organizer'}</Text>
-      
-      {/* Add Hackathon Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Add New Hackathon</Text>
-        {Object.keys(hackathon).map((field) => (
-          <View key={field} style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>
-              {field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
-              placeholderTextColor="#A0A0A0"
-              value={hackathon[field]}
-              onChangeText={(value) => handleChange(field, value)}
-              keyboardType={field === 'cost' || field.includes('seat') || field.includes('time') ? 'numeric' : 'default'}
+      <ScrollView style={styles.container}>
+        <Text style={styles.heading}>Welcome, {user?.username || 'Organizer'}</Text>
+
+        {/* Add Hackathon Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Add New Hackathon</Text>
+          {Object.keys(hackathon).map((field) => (
+            <View key={field} style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>
+                {field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder={`Enter ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+                placeholderTextColor="#A0A0A0"
+                value={hackathon[field]}
+                onChangeText={(value) => handleChange(field, value)}
+                keyboardType={field === 'cost' || field.includes('seat') || field.includes('time') ? 'numeric' : 'default'}
+              />
+            </View>
+          ))}
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitButtonText}>Submit Hackathon</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Your Hackathons Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Your Hackathons</Text>
+          {organiserHackathons.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.noHackathonsText}>No hackathons found</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={organiserHackathons}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.hackathonCard}
+                  onPress={() => navigation.navigate('HackathonDetails', { hackathon: item })}
+                >
+                  <View style={styles.hackathonCard}>
+                    <Text style={styles.hackathonName}>{item.name}</Text>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Time:</Text>
+                      <Text style={styles.hackathonDetail}>{item.time} hours</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Cost:</Text>
+                      <Text style={styles.hackathonDetail}>₹{item.cost}</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Seats:</Text>
+                      <Text style={styles.hackathonDetail}>{item.seatRem}/{item.seatTotal} remaining</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Time Remaining:</Text>
+                      <Text style={styles.hackathonDetail}>{item.timeRem} days</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              )}
             />
-          </View>
-        ))}
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit Hackathon</Text>
+          )}
+        </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
-      </View>
-
-      {/* Your Hackathons Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Your Hackathons</Text>
-        {organiserHackathons.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.noHackathonsText}>No hackathons found</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={organiserHackathons}
-            scrollEnabled={false}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.hackathonCard}>
-                <Text style={styles.hackathonName}>{item.name}</Text>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Time:</Text>
-                  <Text style={styles.hackathonDetail}>{item.time} hours</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Cost:</Text>
-                  <Text style={styles.hackathonDetail}>₹{item.cost}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Seats:</Text>
-                  <Text style={styles.hackathonDetail}>{item.seatRem}/{item.seatTotal} remaining</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Time Remaining:</Text>
-                  <Text style={styles.hackathonDetail}>{item.timeRem} days</Text>
-                </View>
-              </View>
-            )}
-          />
-        )}
-      </View>
-
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
 
     </>
   );
@@ -263,6 +268,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  hackathonCard: {
+    backgroundColor: '#1E2A3A',
+    borderRadius: 10,
+    padding: 18,
+    marginBottom: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: '#64FFDA',
+    // Add these:
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+},
 });
 
 export default OrganiserScreen;
