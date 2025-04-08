@@ -12,8 +12,8 @@ const AdminScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const [pendingRes, approvedRes] = await Promise.all([
-        axios.get('http://10.0.2.2:8000/fetchPendingHackathons'),
-        axios.get('http://10.0.2.2:8000/fetchApprovedHackathons')
+        axios.get('http://192.168.29.218:8000/fetchPendingHackathons'),
+        axios.get('http://192.168.29.218:8000/fetchApprovedHackathons')
       ]);
       setPendingHackathons(pendingRes.data);
       setApprovedHackathons(approvedRes.data);
@@ -27,7 +27,7 @@ const AdminScreen = ({ navigation }) => {
 
   const approveHackathon = async (id) => {
     try {
-      await axios.patch(`http://10.0.2.2:8000/approveHackathon/${id}`);
+      await axios.patch(`http://192.168.29.218:8000/approveHackathon/${id}`);
       Alert.alert('Success', 'Hackathon approved successfully!');
       fetchHackathons(); // Refresh both lists
     } catch (error) {

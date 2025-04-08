@@ -1,36 +1,35 @@
-import React, { useState ,useEffect} from 'react';
-import { View, Text, TextInput, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  ScrollView,
+  Platform,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+} from 'react-native';
 import TrendingHP from '../components/TrendingHP';
 import axios from 'axios';
+import * as Animatable from 'react-native-animatable';
+import { TouchableRipple } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-// const dummyHackathons = [
-//   { id: '1', name: 'Eureka Hacks', time: '36', cost: 'Rs 200', seatRem: 100, seatTotal: 100, timeRem: 30 },
-//   { id: '2', name: 'Horizon Hack', time: '48', cost: 'Rs 150', seatRem: 75, seatTotal: 75, timeRem: 45 },
-//   { id: '3', name: 'InnovateX', time: '24', cost: 'Rs 250', seatRem: 50, seatTotal: 50, timeRem: 60 },
-//   { id: '4', name: 'TechStorm', time: '30', cost: 'Rs 100', seatRem: 120, seatTotal: 120, timeRem: 20 },
-//   { id: '5', name: 'CodeSprint', time: '36', cost: 'Rs 100', seatRem: 60, seatTotal: 60, timeRem: 80 },
-//   { id: '6', name: 'HackOverflow', time: '48', cost: 'Rs 200', seatRem: 90, seatTotal: 90, timeRem: 15 },
-//   { id: '7', name: 'CodeFusion', time: '36', cost: 'Rs 150', seatRem: 80, seatTotal: 80, timeRem: 25 },
-//   { id: '8', name: 'Xavathon', time: '30', cost: 'Rs 180', seatRem: 70, seatTotal: 70, timeRem: 35 },
-//   { id: '9', name: 'TechThrust', time: '24', cost: 'Rs 120', seatRem: 90, seatTotal: 90, timeRem: 50 },
-//   { id: '10', name: 'CodeWave', time: '48', cost: 'Rs 130', seatRem: 100, seatTotal: 100, timeRem: 40 },
-//   { id: '11', name: 'Innovathon', time: '36', cost: 'Rs 180', seatRem: 85, seatTotal: 85, timeRem: 55 },
-//   { id: '12', name: 'HackMania', time: '30', cost: 'Rs 140', seatRem: 95, seatTotal: 95, timeRem: 60 }
-// ];
-
-const SearchScreen = ({navigation}) => {
+const SearchScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [cityQuery, setCityQuery] = useState('');
   const [hackathons, setHackathons] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cityList, setCityList] = useState([]);
 
   useEffect(() => {
     const fetchHackathons = async () => {
       try {
-        const response = await axios.get('http://10.0.2.2:8000/fetchHackathons');
-        console.log(response.data);
-        const approvedHackathons = response.data.filter(hackathon => hackathon.isApproved === 1);
-        approvedHackathons.map(hackathon => console.log(hackathon));
+        const response = await axios.get('http://192.168.29.218:8000/fetchHackathons');
+        const approvedHackathons = response.data.filter(h => h.isApproved === 1);
         setHackathons(approvedHackathons);
+        const uniqueCities = [...new Set(approvedHackathons.map(h => h.city).filter(Boolean))];
+        setCityList(uniqueCities);
       } catch (error) {
         console.error('Error fetching hackathons:', error);
       } finally {
@@ -42,45 +41,173 @@ const SearchScreen = ({navigation}) => {
   }, []);
 
   const filteredHackathons = hackathons.filter(hackathon =>
-    hackathon.name.toLowerCase().includes(searchQuery.toLowerCase())
+    hackathon.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (cityQuery === '' || hackathon.city?.toLowerCase() === cityQuery.toLowerCase())
   );
 
   return (
-    <View style={{ flex: 1, padding: 10, backgroundColor: '#0A192C' }}>
-      <TextInput
-        style={{
-          height: 50,
-          borderColor: 'gray',
-          borderWidth: 1,
-          borderRadius: 10,
-          paddingHorizontal: 10,
-          fontSize: 18,
-          color: 'white',
-          backgroundColor: '#1E2A38'
-        }}
-        placeholder="Search Hackathons..."
-        placeholderTextColor="#A0A0A0"
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-      />
-      
-      {filteredHackathons.length === 0 ? (
-        <Text style={{ color: 'white', textAlign: 'center', marginTop: 20, fontSize: 18 }}>No hackathons found</Text>
-      ) : (
-        <FlatList
-          data={filteredHackathons}
-          keyExtractor={item => item.id?.toString()}
-          renderItem={({ item }) => 
-          <TrendingHP 
-          {...item} 
-          onRegister={() => navigation.navigate('RegisterHackathon', { hackathonId: item.id })}
-          />}
-          ItemSeparatorComponent={() => (
-            <View style={{ height: 1, backgroundColor: 'white', marginVertical: 8, opacity: 0.5 }} />
-          )}
-        />
-      )}
-    </View>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#0A192F' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 20 }}>
+        {/* 🔍 Search Header */}
+        <Animatable.View
+          animation="pulse"
+          iterationCount="infinite"
+          duration={2200}
+          easing="ease-in-out"
+          style={{
+            alignSelf: 'flex-start',
+            marginBottom: 12,
+            position: 'relative',
+          }}
+        >
+          {/* Glowing Text Behind */}
+          <Text
+            style={{
+              position: 'absolute',
+              color: '#3B82F6',
+              fontSize: 24,
+              fontWeight: '700',
+              opacity: 0.25,
+              transform: [{ scale: 1.09 }],
+            }}
+          >
+            Discover Hackathons
+          </Text>
+
+          {/* Main Text On Top */}
+          <Text
+            style={{
+              color: '#F8FAFC',
+              fontSize: 24,
+              fontWeight: '700',
+              textShadowColor: '#3B82F6',
+              textShadowOffset: { width: 0, height: 0 },
+              textShadowRadius: 6,
+            }}
+          >
+            Discover Hackathons
+          </Text>
+        </Animatable.View>
+
+
+        {/* 🔍 Search Input */}
+        <Animatable.View
+          animation="fadeInDown"
+          duration={500}
+          delay={100}
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            borderRadius: 15,
+            paddingHorizontal: 15,
+            paddingVertical: Platform.OS === 'ios' ? 14 : 10,
+            marginBottom: 15,
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.1)',
+            shadowColor: '#000',
+            shadowOpacity: 0.4,
+            shadowOffset: { width: 0, height: 3 },
+            shadowRadius: 6,
+            elevation: 8,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Icon name="search" size={20} color="#9CA3AF" style={{ marginRight: 10 }} />
+          <TextInput
+            placeholder="Search Hackathons..."
+            placeholderTextColor="#9CA3AF"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={{
+              color: 'white',
+              fontSize: 16,
+              flex: 1,
+              padding: 0,
+            }}
+          />
+        </Animatable.View>
+
+        {/* 🌆 City Filters */}
+        {cityList.length > 0 && (
+          <Animatable.View animation="fadeInRight" duration={600}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginBottom: 16 }}
+              contentContainerStyle={{ gap: 10, paddingBottom: 4 }}
+            >
+              {['', ...cityList].map((city, index) => {
+                const isActive = cityQuery === city || (city === '' && cityQuery === '');
+                return (
+                  <TouchableRipple
+                    key={index}
+                    onPress={() => setCityQuery(city)}
+                    rippleColor="rgba(255, 255, 255, 0.2)"
+                    style={{
+                      backgroundColor: isActive ? '#2563EB' : 'rgba(255,255,255,0.06)',
+                      borderColor: isActive ? '#3B82F6' : 'rgba(255,255,255,0.1)',
+                      borderWidth: 1,
+                      paddingHorizontal: 18,
+                      paddingVertical: 8,
+                      borderRadius: 20,
+                    }}
+                  >
+                    <Text style={{ color: 'white', fontWeight: '600', fontSize: 14 }}>
+                      {city === '' ? 'All Cities' : city}
+                    </Text>
+                  </TouchableRipple>
+                );
+              })}
+            </ScrollView>
+          </Animatable.View>
+        )}
+
+        {/* 📜 Hackathon List or Empty State */}
+        {filteredHackathons.length === 0 ? (
+          <Animatable.View
+            animation="fadeIn"
+            delay={200}
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 40,
+              paddingHorizontal: 20,
+            }}
+          >
+            <Icon name="sad-outline" size={60} color="#64748B" style={{ marginBottom: 12 }} />
+            <Text style={{ color: '#94A3B8', fontSize: 16, textAlign: 'center' }}>
+              No hackathons match your search or city filter.
+            </Text>
+          </Animatable.View>
+        ) : (
+          <FlatList
+            data={filteredHackathons}
+            keyExtractor={item => item.id?.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 30 }}
+            renderItem={({ item, index }) => (
+              <Animatable.View animation="fadeInUp" delay={index * 100}>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() =>
+                    navigation.navigate('RegisterHackathon', { hackathonId: item.id })
+                  }
+                >
+                  <TrendingHP {...item} />
+                </TouchableOpacity>
+              </Animatable.View>
+            )}
+            ItemSeparatorComponent={() => (
+              <View style={{ height: 10 }} />
+            )}
+          />
+        )}
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Alert } from 'react-native';
 import { getToken } from '../helpers/asyncStorage';
 import axios from 'axios';
 
-const HackathonDetailsScreen = ({ route, navigation }) => {
+const HackathonDetailsScreen = ({ route }) => {
   const { hackathon } = route.params;
-  const [registrations, setRegistrations] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,13 +13,13 @@ const HackathonDetailsScreen = ({ route, navigation }) => {
       try {
         const token = await getToken();
         const response = await axios.get(
-          `http://10.0.2.2:8000/getHackathonRegistrations/${hackathon.id}`,
+          `http://192.168.29.218:8000/getHackathonRegistrations/${hackathon.id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setRegistrations(response.data);
+        setTeams(response.data);
       } catch (error) {
         console.error('Error fetching registrations:', error);
-        Alert.alert('Error', 'Failed to load registrations');
+        Alert.alert('Error', 'Failed to load team registrations');
       } finally {
         setLoading(false);
       }
@@ -28,10 +28,34 @@ const HackathonDetailsScreen = ({ route, navigation }) => {
     fetchRegistrations();
   }, [hackathon.id]);
 
+  const renderTeam = ({ item }) => {
+    const teammateIds = item.teammate_ids
+      ? item.teammate_ids.split(',').filter(id => id.trim() !== '')
+      : [];
+
+    return (
+      <View style={styles.teamCard}>
+        <Text style={styles.teamName}>Team: {item.team_name}</Text>
+        <Text style={styles.member}>Leader ID: {item.user_id}</Text>
+
+        <Text style={styles.member}>Teammate IDs:</Text>
+        {teammateIds.length > 0 ? (
+          teammateIds.map((id, index) => (
+            <Text key={index} style={styles.teammate}>
+              - User ID: {id}
+            </Text>
+          ))
+        ) : (
+          <Text style={styles.teammate}>No teammates</Text>
+        )}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{hackathon.name}</Text>
-      
+
       <View style={styles.detailsContainer}>
         <Text style={styles.detail}>Duration: {hackathon.time} hours</Text>
         <Text style={styles.detail}>Cost: ₹{hackathon.cost}</Text>
@@ -39,23 +63,17 @@ const HackathonDetailsScreen = ({ route, navigation }) => {
         <Text style={styles.detail}>Time Remaining: {hackathon.timeRem} days</Text>
       </View>
 
-      <Text style={styles.sectionTitle}>Registered Users ({registrations.length})</Text>
-      
+      <Text style={styles.sectionTitle}>Registered Teams ({teams.length})</Text>
+
       {loading ? (
-        <Text style={styles.loadingText}>Loading registrations...</Text>
-      ) : registrations.length === 0 ? (
-        <Text style={styles.emptyText}>No users registered yet</Text>
+        <Text style={styles.loadingText}>Loading teams...</Text>
+      ) : teams.length === 0 ? (
+        <Text style={styles.emptyText}>No teams registered yet</Text>
       ) : (
         <FlatList
-          data={registrations}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.userCard}>
-              <Text style={styles.userName}>{item.username}</Text>
-              <Text style={styles.userDetail}>Email: {item.email}</Text>
-              <Text style={styles.userDetail}>City: {item.city}</Text>
-            </View>
-          )}
+          data={teams}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderTeam}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}
@@ -93,21 +111,26 @@ const styles = StyleSheet.create({
     color: '#64FFDA',
     marginBottom: 15,
   },
-  userCard: {
+  teamCard: {
     backgroundColor: '#1E2A3A',
     borderRadius: 8,
     padding: 15,
   },
-  userName: {
-    color: '#FFFFFF',
+  teamName: {
+    color: '#64FFDA',
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  userDetail: {
-    color: '#CCD6F6',
+  member: {
+    color: '#FFFFFF',
     fontSize: 14,
     marginBottom: 3,
+  },
+  teammate: {
+    color: '#CCD6F6',
+    fontSize: 13,
+    marginLeft: 10,
   },
   separator: {
     height: 1,

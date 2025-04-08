@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { saveToken, getToken, removeToken } from './asyncStorage';
 
-const API_URL = 'http://10.0.2.2:8000'; // Replace with your backend URL
+const API_URL = 'http://192.168.29.218:8000'; // Replace with your backend URL
 
 // Create an Axios instance
 const api = axios.create({
@@ -20,14 +20,19 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export const register = async (username, email, password, name, city) => {
+export const register = async (username, email, password, name, city,role) => {
   
-  const requestBody = { username, email, password, name, city };
+  const requestBody = { username, email, password, name, city, role };
   console.log("Register request body:", requestBody);
   try {
     const res = await axios.post(`${API_URL}/register`, {
-      username, email, password, name, city,
-    });
+      username, email, password, name, city, role,
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+  );
     return res.data;
   } catch (error) {
     console.error('Registration error:', error.response.data);

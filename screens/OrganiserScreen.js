@@ -10,7 +10,8 @@ const OrganiserScreen = ({ navigation }) => {
     cost: '',
     seatRem: '',
     seatTotal: '',
-    timeRem: ''
+    timeRem: '',
+    city: ''
   });
 
   const [organiserHackathons, setOrganiserHackathons] = useState([]);
@@ -32,7 +33,7 @@ const OrganiserScreen = ({ navigation }) => {
     const fetchOrganiserHackathons = async () => {
       try {
         const token = await getToken();
-        const response = await axios.get('http://10.0.2.2:8000/organiserHackathons', {
+        const response = await axios.get('http://192.168.29.218:8000/organiserHackathons', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOrganiserHackathons(response.data);
@@ -53,7 +54,7 @@ const OrganiserScreen = ({ navigation }) => {
   const handleSubmit = async () => {
     try {
       const token = await getToken();
-      const response = await axios.post('http://10.0.2.2:8000/addHackathon',
+      const response = await axios.post('http://192.168.29.218:8000/addHackathon',
         hackathon,
         {
           headers: {
@@ -62,7 +63,7 @@ const OrganiserScreen = ({ navigation }) => {
           }
         });
       Alert.alert('Success', 'Hackathon added successfully!');
-      setHackathon({ name: '', time: '', cost: '', seatRem: '', seatTotal: '', timeRem: '' });
+      setHackathon({ name: '', time: '', cost: '', seatRem: '', seatTotal: '', timeRem: '', city: '' });
     } catch (error) {
       console.error('Error adding hackathon:', error);
       Alert.alert('Error', 'Failed to add hackathon');

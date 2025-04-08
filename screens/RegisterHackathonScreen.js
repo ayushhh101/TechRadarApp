@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Alert, TouchableOpacity } from "react-native";
+import { View, Text, Alert, TouchableOpacity, TextInput } from "react-native";
 import axios from "axios";
 import { getToken, getUser } from "../helpers/asyncStorage";
 
@@ -7,6 +7,8 @@ const RegisterHackathonScreen = ({ route, navigation }) => {
   const { hackathonId } = route.params;
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
+  const [teamName, setTeamName] = useState("");
+  const [teammates, setTeammates] = useState(""); // comma-separated string input
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -30,16 +32,26 @@ const RegisterHackathonScreen = ({ route, navigation }) => {
       const token = await getToken();
       if (!userData) throw new Error("User data not found");
 
+      // Parse teammate IDs from comma-separated string
+      const teammateIds = teammates
+        .split(",")
+        .map(id => parseInt(id.trim()))
+        .filter(id => !isNaN(id));
+
+      if (teammateIds.length === 0) {
+        Alert.alert("Error", "Please enter valid teammate IDs.");
+        return;
+      }
+
       const response = await axios.post(
-        "http://10.0.2.2:8000/registerForHackathon",
+        `http://192.168.29.218:8000/registerForHackathon/${hackathonId}`, // <-- FIXED
         {
-          hackathonId,
-          username: userData.username,
-          email: userData.email,
-          city: userData.city
+          team_name: teamName.trim(), // 🔁 changed from teamName
+          teammate_ids: teammateIds   // 🔁 changed from teammates
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
 
       Alert.alert("Success", response.data.message);
       navigation.goBack();
@@ -64,16 +76,24 @@ const RegisterHackathonScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Register for Hackathon</Text>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.infoLabel}>Username:</Text>
-        <Text style={styles.infoText}>{userData?.username}</Text>
+      <Text style={styles.infoLabel}>Team Name:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter team name"
+        placeholderTextColor="#aaa"
+        value={teamName}
+        onChangeText={setTeamName}
+      />
 
-        <Text style={styles.infoLabel}>Email:</Text>
-        <Text style={styles.infoText}>{userData?.email}</Text>
-
-        <Text style={styles.infoLabel}>City:</Text>
-        <Text style={styles.infoText}>{userData?.city}</Text>
-      </View>
+      <Text style={styles.infoLabel}>Teammate IDs (comma separated):</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="e.g. 12, 13, 14"
+        placeholderTextColor="#aaa"
+        value={teammates}
+        onChangeText={setTeammates}
+        keyboardType="numeric"
+      />
 
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Confirm Registration</Text>
@@ -95,22 +115,18 @@ const styles = {
     marginBottom: 30,
     fontWeight: "bold"
   },
-  infoContainer: {
-    backgroundColor: "#1E2A38",
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 30
-  },
   infoLabel: {
     color: "#64FFDA",
     fontSize: 16,
     marginBottom: 5,
     fontWeight: "500"
   },
-  infoText: {
+  input: {
+    backgroundColor: "#1E2A38",
     color: "white",
-    fontSize: 18,
-    marginBottom: 15
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20
   },
   button: {
     backgroundColor: "#1E90FF",

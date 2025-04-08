@@ -1,3 +1,4 @@
+import 'react-native-reanimated';
 import 'react-native-gesture-handler';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
@@ -14,11 +15,13 @@ import AdminScreen from './screens/AdminScreen';
 import OrganiserScreen from './screens/OrganiserScreen';
 import RegisterHackathonScreen from './screens/RegisterHackathonScreen';
 import HackathonDetailsScreen from './screens/HackathonDetailsScreen';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 const Stack = createStackNavigator();
 
 const App = () => {
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <PaperProvider>  {/* Wrap your app with this */}
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
@@ -27,15 +30,16 @@ const App = () => {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
         <Stack.Screen name="Wishlist" component={WishlistScreen} />
-        <Stack.Screen name="Joined" component={JoinedScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="AdminDashboard" component={AdminScreen} />
         <Stack.Screen name="OrganiserDashboard" component={OrganiserScreen} />
         <Stack.Screen name="RegisterHackathon" component={RegisterHackathonScreen} />
         <Stack.Screen name="HackathonDetails" component={HackathonDetailsScreen} />
+        <Stack.Screen name="JoinedScreen" component={JoinedScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     </PaperProvider>
+    </GestureHandlerRootView>
   );
 };
 

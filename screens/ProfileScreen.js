@@ -1,10 +1,13 @@
-// username , email , name , profilePic , city , skillset
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
-import { getUsername, getToken } from '../helpers/asyncStorage';
-import axios from 'axios';
-import { Button } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
+import * as Animatable from 'react-native-animatable';
 import { getUser } from '../helpers/asyncStorage';
 
 const ProfileScreen = () => {
@@ -18,15 +21,13 @@ const ProfileScreen = () => {
       return [];
     }
   };
-  
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const storedUser = await getUser();
         if (storedUser) {
           setUserData(storedUser);
-        } else {
-          console.error("No user data found");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -36,62 +37,128 @@ const ProfileScreen = () => {
     fetchUserData();
   }, []);
 
-    if (!userData) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.loadingText}>Loading Profile...</Text>
-            </View>
-        );
-    }
-
+  if (!userData) {
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.profileBox}>
-        <Text style={styles.title}>Profile</Text>
-        <Text><Text style={styles.label}>Name:</Text> {userData.name}</Text>
-        <Text><Text style={styles.label}>Username:</Text> {userData.username}</Text>
-        <Text><Text style={styles.label}>Email:</Text> {userData.email}</Text>
-        <Text><Text style={styles.label}>City:</Text> {userData.city}</Text>
-        <Text>
-  <Text style={styles.label}>Skillset:</Text> 
-  {userData.skillset ? safelyParseJSON(userData.skillset).join(', ') : "Not specified"}
-</Text>
-
+      <View style={styles.bg}>
+        <ActivityIndicator size="large" color="#00FFFF" />
+        <Text style={styles.loadingText}>Loading Profile...</Text>
       </View>
-    </ScrollView>
     );
+  }
+
+  return (
+    <View style={styles.bg}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Animatable.View animation="fadeInUp" duration={800} style={styles.card}>
+          <Text style={styles.title}>Profile</Text>
+
+          {userData.profilePic && (
+            <Image source={{ uri: userData.profilePic }} style={styles.avatar} />
+          )}
+
+          <Text style={styles.label}>User ID</Text>
+          <Text style={styles.info}>{userData._id || userData.id || "N/A"}</Text>
+
+          <Text style={styles.label}>Name</Text>
+          <Text style={styles.info}>{userData.name}</Text>
+
+          <Text style={styles.label}>Username</Text>
+          <Text style={styles.info}>{userData.username}</Text>
+
+          <Text style={styles.label}>Email</Text>
+          <Text style={styles.info}>{userData.email}</Text>
+
+          <Text style={styles.label}>City</Text>
+          <Text style={styles.info}>{userData.city || 'Not specified'}</Text>
+
+          <Text style={styles.label}>Skillset</Text>
+          <View style={styles.skillContainer}>
+            {userData.skillset
+              ? safelyParseJSON(userData.skillset).map((skill, idx) => (
+                  <View key={idx} style={styles.skillBadge}>
+                    <Text style={styles.skillText}>{skill}</Text>
+                  </View>
+                ))
+              : <Text style={styles.info}>Not specified</Text>}
+          </View>
+        </Animatable.View>
+      </ScrollView>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: '#f8f9fa',
+  bg: {
+    flex: 1,
+    backgroundColor: '#0d1117',
+    justifyContent: 'center',
+  },
+  scrollContent: {
+    padding: 24,
     alignItems: 'center',
   },
-  profileBox: {
-    backgroundColor: '#ffffff',
-    padding: 20,
-    borderRadius: 10,
-    elevation: 3,
-    width: '90%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  card: {
+    backgroundColor: '#161b22',
+    padding: 25,
+    borderRadius: 20,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#00ffff44',
+    shadowColor: '#00ffff',
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 10,
   },
   title: {
-    fontSize: 20,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 10,
+    color: '#00FFFF',
     textAlign: 'center',
+    marginBottom: 20,
   },
   label: {
-    fontWeight: 'bold',
+    color: '#8b949e',
+    marginTop: 12,
+    fontSize: 13,
+    fontWeight: '700',
   },
-  errorText: {
+  info: {
     fontSize: 16,
-    color: 'red',
+    color: '#ffffff',
+  },
+  loadingText: {
+    color: '#00FFFF',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    marginBottom: 15,
+    alignSelf: 'center',
+    borderWidth: 2,
+    borderColor: '#00FFFF',
+  },
+  skillContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+    gap: 10,
+  },
+  skillBadge: {
+    backgroundColor: '#00ffff22',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#00ffffaa',
+  },
+  skillText: {
+    color: '#00FFFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
 });
 

@@ -2,11 +2,13 @@ import React from 'react';
 import { Text, View, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import style from '../components/styleTrendingHP';
+import * as Animatable from 'react-native-animatable'; // ✅ Import this
 
-const TrendingHP = ({ id, clg, name, time, cost, seatRem, seatTotal, timeRem }) => {
+const TrendingHP = ({ id, clg, name, time, cost, seatRem, seatTotal, timeRem, city }) => {
     const navigation = useNavigation();
+
     return (
-        <View>
+        <Animatable.View animation="flipInY" duration={900} style={{ marginVertical: 10 }}>
             <View style={[style.body]}>
                 <View style={[style.bgs]}>
                     <View style={[style.view1]}>
@@ -16,15 +18,14 @@ const TrendingHP = ({ id, clg, name, time, cost, seatRem, seatTotal, timeRem }) 
                     </View>
 
                     <Text style={[style.contName]}>{name}</Text>
+                    <Text style={[style.normal]}>City: {city}</Text>
                     <Text style={[style.normal]}>Duration: {time} hrs</Text>
 
-                    {/* Fix for Cost */}
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={[style.normal]}>Cost: </Text>
                         <Text style={style.free}>{cost}</Text>
                     </View>
 
-                    {/* Fix for Seats Remaining */}
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={[style.normal]}>Seats Remaining: </Text>
                         <Text style={style.seats}>{seatRem}</Text>
@@ -46,7 +47,7 @@ const TrendingHP = ({ id, clg, name, time, cost, seatRem, seatTotal, timeRem }) 
                     </TouchableOpacity>
                 </View>
             </View>
-        </View>
+        </Animatable.View>
     );
 };
 

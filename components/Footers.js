@@ -29,7 +29,7 @@ const Footer = ({navigation }) => {
             </View>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Joined')}>
+        <TouchableOpacity onPress={() => navigation.navigate('JoinedScreen')}>
             <View style={{ alignItems: 'center' }}>
                 <FontAwesomeIcon size={30} icon={faClipboardList} />
                 <Text>Joined</Text>
